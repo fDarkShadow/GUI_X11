@@ -1,5 +1,8 @@
-#include "DisplayServer.hpp"
-#include "WindowControler.hpp"
+#include "display/LocalDisplayServer.hpp"
+#include "display/Singleton.hpp"
+#include "screen/DefaultScreenControler.hpp"
+#include "window/MainWindow.hpp"
+#include "Events.hpp"
 #include "GraphicContext.hpp"
 
 #include <functional>
@@ -10,59 +13,56 @@
 
 
 
-int main () {
-    // XEvent event;		/* the XEvent declaration !!! */
-    // KeySym key;		/* a dealie-bob to handle KeyPress Events */	
-    // char text[255];		/* a char buffer for KeyPress Events */
+int main () { 
+    using Display = x11::Singleton<x11::LocalDisplayServer>;
+    using Screen = x11::DefaultScreenControler<Display>;
+    Screen screen;
+    x11::MainWindow<Display> window(
+        "Window",
+        0,
+        0,
+        300,
+        300,
+        5,
+        x11::screen::getWhitePixel(screen),
+        x11::screen::getWhitePixel(screen)
+    );
+    x11::Event<Display> event;
+    x11::GraphicContext<Display> gc(window, x11::screen::getWhitePixel(screen), x11::screen::getBlackPixel(screen));
 
-    // init_x();
-
-    // /* look for events forever... */
-    // while(1) {		
-    // 	/* get the next event and stuff it into our event variable.
-    // 	   Note:  only events we set the mask for are detected!
-    // 	*/
-    // 	XNextEvent(dis, &event);
-    
-    // 	if (event.type==Expose && event.xexpose.count==0) {
-    // 	/* the window was exposed redraw it! */
-    // 		redraw();
-    // 	}
-    // 	if (event.type==KeyPress&&
-    // 	    XLookupString(&event.xkey,text,255,&key,0)==1) {
-    // 	/* use the XLookupString routine to convert the invent
-    // 	   KeyPress data into regular text.  Weird but necessary...
-    // 	*/
-    // 		if (text[0]=='q') {
-    // 			close_x();
-    // 		}
-    // 		printf("You pressed the %c key!\n",text[0]);
-    // 	}
-    // 	if (event.type==ButtonPress) {
-    // 	/* tell where the mouse Button was Pressed */
-    // 		int x=event.xbutton.x,
-    // 		    y=event.xbutton.y;
-
-    // 		strcpy(text,"X is FUN!");
-    // 		XSetForeground(dis,gc,rand()%event.xbutton.x%255);
-    // 		XDrawString(dis,win,gc,x,y, text, strlen(text));
-    // 	}
-    // }
-
-    x11::DisplayServer display{};
-    x11::WindowControler<x11::DisplayServer> window(display);
-    x11::GraphicContext<x11::DisplayServer> gc(display, window);
-    XEvent event;
-    KeySym key;
-    char text[255];
     while(true)
     {
-        XNextEvent(&display.getDisplay(), &event);
-        if (event.type==KeyPress && XLookupString(&event.xkey,text,255,&key,0)==1)
+        x11::event::checkEvent(event);
+        if (x11::event::getEventType(event) == x11::event::Type::KEY_PRESSED)
         {
-            if (text[0]=='q') {
+            auto c = x11::event::getChar(event);
+            if(c == 'q')
+            {
                 return 1;
             }
+            if(c == '\r')
+            {
+                x11::window_controler::clear(window);
+            }
+        }
+
+        if (x11::event::getEventType(event) == x11::event::Type::BUTTON_PRESSED)
+        {
+            std::string t("Waouh");
+            XSetForeground(
+                &x11::display_server::getDisplay(Display::getInstance()),
+                gc.getGC(),
+                rand()%x11::event::getXPosition(event)%255
+            );
+            XDrawString(
+                &x11::display_server::getDisplay(Display::getInstance()),
+                window.getWindow(),
+                gc.getGC(),
+                x11::event::getXPosition(event),
+                x11::event::getYPosition(event),
+                t.c_str(),
+                t.size()
+            );
         }
     }
     return 0;

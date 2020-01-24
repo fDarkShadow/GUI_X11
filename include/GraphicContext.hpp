@@ -12,19 +12,27 @@ namespace x11
     {
         public:
             template<class WindowControler>
-            GraphicContext(DisplayServer& display, const WindowControler& windowContoler) : _display(display)
+            GraphicContext(
+                const WindowControler& windowControler,
+                unsigned long backGroundColor,
+                unsigned long foreGroundColor
+            )
             {
-                _gc = XCreateGC(&display_server::getDisplay(_display), window_controler::getWindow(windowContoler), 0,0);        
-                XSetBackground(&display_server::getDisplay(_display),_gc,display_server::getWhitePixel(_display));
-                XSetForeground(&display_server::getDisplay(_display),_gc,display_server::getBlackPixel(_display));
+                _gc = XCreateGC(&display_server::getDisplay(DisplayServer::getInstance()), window_controler::getWindow(windowControler), 0,0);        
+                XSetBackground(&display_server::getDisplay(DisplayServer::getInstance()),_gc,backGroundColor);
+                XSetForeground(&display_server::getDisplay(DisplayServer::getInstance()),_gc,foreGroundColor);
             }
             virtual ~GraphicContext()
             {
-                XFreeGC(&display_server::getDisplay(_display), _gc);
+                XFreeGC(&display_server::getDisplay(DisplayServer::getInstance()), _gc);
+            }
+
+            GC getGC() const
+            {
+                return _gc;
             }
 
         private:
-            DisplayServer& _display;
             GC _gc;
     };
 }
