@@ -35,6 +35,15 @@ namespace x11
         private:
             GC _gc;
     };
+
+    namespace graphic_context
+    {
+        template<class DisplayServer>
+        inline GC getContext(const GraphicContext<DisplayServer>& gc)
+        {
+            return gc.getGC();
+        }
+    }
 }
 
 #endif

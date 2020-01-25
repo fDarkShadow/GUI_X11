@@ -27,16 +27,6 @@ namespace x11
         {
             return screen.getScreen();
         }
-        template<class DisplayServer>
-        inline unsigned long getWhitePixel(const DefaultScreenControler<DisplayServer>& screen)
-        {
-            return WhitePixel(&display_server::getDisplay(DisplayServer::getInstance()), screen.getScreen());
-        }
-        template<class DisplayServer>
-        inline unsigned long getBlackPixel(const DefaultScreenControler<DisplayServer>& screen)
-        {
-            return BlackPixel(&display_server::getDisplay(DisplayServer::getInstance()), screen.getScreen());
-        }
     }
 }
 
