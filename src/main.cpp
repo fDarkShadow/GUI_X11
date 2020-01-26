@@ -2,6 +2,7 @@
 #include "display/Singleton.hpp"
 #include "screen/DefaultScreenControler.hpp"
 #include "window/MainWindow.hpp"
+#include "window/ChildWindow.hpp"
 #include "Events.hpp"
 #include "GraphicContext.hpp"
 #include "pixelColor.hpp"
@@ -28,6 +29,16 @@ int main () {
         10,
         x11::pixel_color::getColor(0,255,0),
         x11::pixel_color::getColor(255,0,0)
+    );
+    x11::ChildWindow<Display> window2(
+        window,
+        0,
+        0,
+        200,
+        200,
+        10,
+        x11::pixel_color::getColor(0,255,0),
+        x11::pixel_color::getColor(255,0,255)
     );
     x11::Event<Display> event;
     x11::GraphicContext<Display> gc(window, x11::pixel_color::getColor(0,0,0), x11::pixel_color::getColor(0,0,0));
